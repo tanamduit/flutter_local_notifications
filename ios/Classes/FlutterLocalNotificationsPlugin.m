@@ -66,16 +66,17 @@ typedef NS_ENUM(NSInteger, RepeatInterval) {
                methodChannelWithName:CHANNEL
                binaryMessenger:[registrar messenger]];
     FlutterLocalNotificationsPlugin* instance = [[FlutterLocalNotificationsPlugin alloc] init];
-    if(@available(iOS 10.0, *)) {
-        UNUserNotificationCenter *center = [UNUserNotificationCenter currentNotificationCenter];
-        center.delegate = instance;
-    }
+    // if(@available(iOS 10.0, *)) {
+    //     UNUserNotificationCenter *center = [UNUserNotificationCenter currentNotificationCenter];
+    //     center.delegate = instance;
+    // }
     [registrar addApplicationDelegate:instance];
     [registrar addMethodCallDelegate:instance channel:channel];
 }
 
 - (void)initialize:(FlutterMethodCall * _Nonnull)call result:(FlutterResult _Nonnull)result {
     appResumingFromBackground = false;
+    NSLog(@"Start initializing");
     NSDictionary *arguments = [call arguments];
     if(arguments[DEFAULT_PRESENT_ALERT] != [NSNull null]) {
         displayAlert = [[arguments objectForKey:DEFAULT_PRESENT_ALERT] boolValue];
@@ -99,6 +100,7 @@ typedef NS_ENUM(NSInteger, RepeatInterval) {
         requestedBadgePermission = [arguments[REQUEST_BADGE_PERMISSION] boolValue];
     }
     if(@available(iOS 10.0, *)) {
+        NSLog(@"Goes here");
         UNUserNotificationCenter *center = [UNUserNotificationCenter currentNotificationCenter];
         UNAuthorizationOptions authorizationOptions = 0;
         if (requestedSoundPermission) {
@@ -253,6 +255,7 @@ typedef NS_ENUM(NSInteger, RepeatInterval) {
 }
 
 - (void) showUserNotification:(NotificationDetails *) notificationDetails NS_AVAILABLE_IOS(10.0) {
+    NSLog(@"show User Notification ios 10+");
     UNMutableNotificationContent* content = [[UNMutableNotificationContent alloc] init];
     UNNotificationTrigger *trigger;
     content.title = notificationDetails.title;
@@ -323,6 +326,7 @@ typedef NS_ENUM(NSInteger, RepeatInterval) {
 }
 
 - (void) showLocalNotification:(NotificationDetails *) notificationDetails {
+    NSLog(@"Notification below IOS 10");
     UILocalNotification *notification = [[UILocalNotification alloc] init];
     notification.alertBody = notificationDetails.body;
     if(@available(iOS 8.2, *)) {
@@ -424,8 +428,10 @@ didReceiveNotificationResponse:(UNNotificationResponse *)response
         
     }
 }
+
 - (BOOL)application:(UIApplication *)application
 didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
+    NSLog(@"Launching with Option local option");
     if (launchOptions != nil) {
         launchNotification = (UILocalNotification *)[launchOptions objectForKey:UIApplicationLaunchOptionsLocalNotificationKey];
         launchingAppFromNotification = launchNotification != nil;
@@ -435,10 +441,12 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
 }
 
 - (void)applicationDidEnterBackground:(UIApplication *)application {
+    NSLog(@"enter background local option");
     appResumingFromBackground = true;
 }
 
 - (void)applicationDidBecomeActive:(UIApplication *)application {
+    NSLog(@"Become Active local option");
     appResumingFromBackground = false;
 }
 
