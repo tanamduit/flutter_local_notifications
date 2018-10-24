@@ -70,7 +70,7 @@ typedef NS_ENUM(NSInteger, RepeatInterval) {
     //     UNUserNotificationCenter *center = [UNUserNotificationCenter currentNotificationCenter];
     //     center.delegate = instance;
     // }
-    [registrar addApplicationDelegate:instance];
+    //[registrar addApplicationDelegate:instance];
     [registrar addMethodCallDelegate:instance channel:channel];
 }
 
