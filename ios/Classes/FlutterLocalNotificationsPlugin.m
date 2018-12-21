@@ -50,6 +50,8 @@ bool updateBadge;
 bool initialized;
 bool launchingAppFromNotification;
 
+NSInteger badgeCount = 0;
+
 + (bool) resumingFromBackground { return appResumingFromBackground; }
 UILocalNotification *launchNotification;
 
@@ -70,7 +72,7 @@ typedef NS_ENUM(NSInteger, RepeatInterval) {
     //     UNUserNotificationCenter *center = [UNUserNotificationCenter currentNotificationCenter];
     //     center.delegate = instance;
     // }
-    //[registrar addApplicationDelegate:instance];
+    [registrar addApplicationDelegate:instance];
     [registrar addMethodCallDelegate:instance channel:channel];
 }
 
@@ -322,7 +324,12 @@ typedef NS_ENUM(NSInteger, RepeatInterval) {
             NSLog(@"Unable to Add Notification Request");
         }
     }];
-    
+    if(badgeCount < 0){
+        badgeCount = 0;
+    }
+    badgeCount++;
+    NSLog(@"badgeCount : %zd",badgeCount);
+    [UIApplication sharedApplication].applicationIconBadgeNumber = badgeCount;
 }
 
 - (void) showLocalNotification:(NotificationDetails *) notificationDetails {
@@ -386,6 +393,11 @@ typedef NS_ENUM(NSInteger, RepeatInterval) {
         notification.fireDate = [NSDate dateWithTimeIntervalSince1970:[notificationDetails.secondsSinceEpoch integerValue]];
         [[UIApplication sharedApplication] scheduleLocalNotification:notification];
     }
+    if(badgeCount < 0){
+        badgeCount = 0;
+    }
+    badgeCount++;
+    [UIApplication sharedApplication].applicationIconBadgeNumber = badgeCount;
 }
 
 
@@ -429,25 +441,12 @@ didReceiveNotificationResponse:(UNNotificationResponse *)response
     }
 }
 
-- (BOOL)application:(UIApplication *)application
-didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
-    NSLog(@"Launching with Option local option");
-    if (launchOptions != nil) {
-        launchNotification = (UILocalNotification *)[launchOptions objectForKey:UIApplicationLaunchOptionsLocalNotificationKey];
-        launchingAppFromNotification = launchNotification != nil;
-    }
-    
-    return YES;
-}
+#pragma mark appdelegate
 
-- (void)applicationDidEnterBackground:(UIApplication *)application {
-    NSLog(@"enter background local option");
-    appResumingFromBackground = true;
-}
-
-- (void)applicationDidBecomeActive:(UIApplication *)application {
-    NSLog(@"Become Active local option");
-    appResumingFromBackground = false;
+-(void) application:(UIApplication *)application
+didReceiveLocalNotification:(UILocalNotification *)notification{
+    notification.applicationIconBadgeNumber = 0;
+    badgeCount = 0;
 }
 
 @end
